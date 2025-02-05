@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { StreamingTextResponse, LangChainStream } from "ai";
 import { auth, currentUser } from "@clerk/nextjs";
-import { Replicate } from "langchain/llms/replicate";
-import { CallbackManager } from "langchain/callbacks";
+import { ChatTogetherAI } from "@langchain/community/chat_models/togetherai";
+import { CallbackManager } from "@langchain/core/callbacks/manager";
 import { NextResponse } from "next/server";
 
 import { MemoryManager } from "@/lib/memory";
@@ -84,13 +84,10 @@ export async function POST(
     }
     const { handlers } = LangChainStream();
     // Call Replicate for inference
-    const model = new Replicate({
+    const model = new ChatTogetherAI({
       model:
-        "a16z-infra/llama-2-13b-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
-      input: {
-        max_length: 2048,
-      },
-      apiKey: process.env.REPLICATE_API_TOKEN,
+        "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+      apiKey: process.env.TOGETHER_API_KEY,
       callbackManager: CallbackManager.fromHandlers(handlers),
     });
 
@@ -99,7 +96,7 @@ export async function POST(
 
     const resp = String(
       await model
-        .call(
+        .invoke(
           `
         ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${companion.name}: prefix. 
 
