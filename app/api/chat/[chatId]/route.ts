@@ -3,6 +3,7 @@ import { StreamingTextResponse, LangChainStream } from "ai";
 import { auth, currentUser } from "@clerk/nextjs";
 import { ChatTogetherAI } from "@langchain/community/chat_models/togetherai";
 import { CallbackManager } from "@langchain/core/callbacks/manager";
+import { AIMessage } from "@langchain/core/messages";
 import { NextResponse } from "next/server";
 
 import { MemoryManager } from "@/lib/memory";
@@ -55,7 +56,7 @@ export async function POST(
     const companionKey = {
       companionName: name!,
       userId: user.id,
-      modelName: "llama2-13b",
+      modelName: "Llama-3.3-70B",
     };
     const memoryManager = await MemoryManager.getInstance();
 
@@ -94,7 +95,7 @@ export async function POST(
     // Turn verbose on for debugging
     model.verbose = true;
 
-    const resp = String(
+    const resp: AIMessage = 
       await model
         .invoke(
           `
@@ -107,12 +108,10 @@ export async function POST(
 
 
         ${recentChatHistory}\n${companion.name}:`,
-        )
-        .catch(console.error),
-    );
+        );
 
-    const cleaned = resp.replaceAll(",", "");
-    const chunks = cleaned.split("\n");
+    const cleaned = resp.content;
+    const chunks = cleaned.toString().split("\n");
     const response = chunks[0];
 
     await memoryManager.writeToHistory("" + response.trim(), companionKey);
