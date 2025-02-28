@@ -32,6 +32,16 @@ export const ChatMessages = ({
     scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  // Sort messages chronologically to ensure they're displayed in order
+  const sortedMessages = [...messages].sort((a, b) => {
+    // If messages have timestamps, use them
+    if (a.timestamp && b.timestamp) {
+      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+    }
+    // Otherwise keep the original order (as they were loaded from DB)
+    return 0;
+  });
+
   return (
     <div className="flex-1 overflow-y-auto pr-4">
       <ChatMessage
@@ -41,9 +51,9 @@ export const ChatMessages = ({
         content={`Hello, I am ${companion.name}, ${companion.description}.`}
       />
 
-      {messages.map((message) => (
+      {sortedMessages.map((message, index) => (
         <ChatMessage
-          key={message.content}
+          key={`${message.content}-${index}`}
           role={message.role}
           content={message.content}
           src={companion.src}

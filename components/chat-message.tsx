@@ -16,6 +16,7 @@ export type ChatMessageProps = {
   content?: string;
   isLoading?: boolean;
   src?: string;
+  timestamp?: Date | string;
 };
 
 export const ChatMessage = ({

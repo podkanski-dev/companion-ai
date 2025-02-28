@@ -21,9 +21,15 @@ type ChatClientProps = {
 
 export const ChatClient = ({ companion }: ChatClientProps) => {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatMessageProps[]>(
-    companion.messages,
-  );
+  
+  // Map database messages to ChatMessageProps with timestamps
+  const initialMessages = companion.messages.map(message => ({
+    role: message.role as "system" | "user",
+    content: message.content,
+    timestamp: message.createdAt
+  }));
+  
+  const [messages, setMessages] = useState<ChatMessageProps[]>(initialMessages);
 
   const { input, isLoading, handleInputChange, handleSubmit, setInput } =
     useCompletion({
@@ -32,6 +38,7 @@ export const ChatClient = ({ companion }: ChatClientProps) => {
         const systemMessage: ChatMessageProps = {
           role: "system",
           content: completion,
+          timestamp: new Date(),
         };
 
         setMessages((current) => [...current, systemMessage]);
@@ -45,6 +52,7 @@ export const ChatClient = ({ companion }: ChatClientProps) => {
     const userMessage: ChatMessageProps = {
       role: "user",
       content: input,
+      timestamp: new Date(),
     };
 
     setMessages((current) => [...current, userMessage]);
